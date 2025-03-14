@@ -23,4 +23,10 @@ public class CartItem {
     private Inventory inventory;
 
     private int quantity;
+
+    public CartItem (Cart cart, Inventory inventory, int quantity) {
+        this.cart = cart;
+        this.inventory = inventory;
+        this.quantity = quantity;
+    }
 }

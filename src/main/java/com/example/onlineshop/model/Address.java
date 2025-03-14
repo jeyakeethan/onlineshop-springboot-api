@@ -21,6 +21,6 @@ public class Address {
     private String postalCode;
 
     @ManyToOne
-    @JoinColumn(name = "email")
+    @JoinColumn(name = "userId", referencedColumnName = "email")
     private User user;
 }

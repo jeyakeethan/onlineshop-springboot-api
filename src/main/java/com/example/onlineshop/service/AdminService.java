@@ -1,17 +1,8 @@
 package com.example.onlineshop.service;
 
-import com.example.onlineshop.dto.InventoryDTO;
-import com.example.onlineshop.dto.OrderDTO;
-import com.example.onlineshop.dto.ProductDTO;
-import com.example.onlineshop.dto.SKUDTO;
-import com.example.onlineshop.model.Inventory;
-import com.example.onlineshop.model.Order;
-import com.example.onlineshop.model.Product;
-import com.example.onlineshop.model.SKU;
-import com.example.onlineshop.repository.OrderRepository;
-import com.example.onlineshop.repository.ProductRepository;
-import com.example.onlineshop.repository.SKURepository;
-import com.example.onlineshop.repository.InventoryRepository;
+import com.example.onlineshop.dto.*;
+import com.example.onlineshop.model.*;
+import com.example.onlineshop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,70 +24,136 @@ public class AdminService {
     @Autowired
     private OrderRepository orderRepository;
 
-    // Add a new product along with SKUs (Inventories will be added separately)
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    // Add a new product along with SKUs
     public void addProduct(ProductDTO productDTO) {
-        // Create and save the product
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         productRepository.save(product);
 
-        // Add SKUs for the product
         for (SKUDTO skuDTO : productDTO.getSkuDTOs()) {
             SKU sku = new SKU();
             sku.setSize(skuDTO.getSize());
             sku.setColor(skuDTO.getColor());
             sku.setSkuCode(skuDTO.getSkuCode());
-            sku.setProduct(product); // Link SKU to the product
+            sku.setProduct(product);
             skuRepository.save(sku);
         }
     }
 
-    // Add inventory for a specific SKU (Multiple inventories can be added for a SKU)
     public void addInventory(Long skuId, InventoryDTO inventoryDTO) {
-        // Find SKU
         SKU sku = skuRepository.findById(skuId)
                 .orElseThrow(() -> new RuntimeException("SKU not found"));
 
-        // Create and save inventory
         Inventory inventory = new Inventory();
         inventory.setSku(sku);
         inventory.setCostPrice(inventoryDTO.getCostPrice());
         inventory.setSellingPrice(inventoryDTO.getSellingPrice());
         inventory.setStockAvailable(inventoryDTO.getStockAvailable());
-
         inventoryRepository.save(inventory);
     }
 
-    // Update stock for a specific SKU
     public void updateStock(Long inventoryId, int newStock) {
-        // Find the inventory and its corresponding SKU
-        Inventory inventory = inventoryRepository.findById(inventoryId).orElseThrow(() -> new RuntimeException("Inventory not found for inventory Id"));
-        SKU sku = skuRepository.findById(inventory.getSku().getSkuId()).orElseThrow(() -> new RuntimeException("SKU not found"));
-        // Update the stock available in the inventory
+        Inventory inventory = inventoryRepository.findById(inventoryId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found"));
         inventory.setStockAvailable(newStock);
         inventoryRepository.save(inventory);
     }
 
-    // Update pricing for a specific SKU
     public void updateProductPricing(Long skuId, double newSellingPrice, double newCostPrice) {
         SKU sku = skuRepository.findById(skuId).orElseThrow(() -> new RuntimeException("SKU not found"));
-        Inventory inventory = inventoryRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Inventory not found for SKU"));
-
-        // Update pricing in the inventory
+        Inventory inventory = inventoryRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Inventory not found"));
         inventory.setSellingPrice(newSellingPrice);
         inventory.setCostPrice(newCostPrice);
         inventoryRepository.save(inventory);
     }
 
-    // View all orders (admin only) and convert Order to OrderDTO
     public List<OrderDTO> getAllOrders() {
-        // Fetch all orders from the repository (database)
-        List<Order> orders = orderRepository.findAll();
+        return orderRepository.findAll().stream().map(OrderDTO::new).collect(Collectors.toList());
+    }
 
-        // Convert List of Order models to List of OrderDTOs
-        return orders.stream()
-                .map(order -> new OrderDTO(order)) // Convert each Order entity to OrderDTO
-                .collect(Collectors.toList());
+    public void createUser(UserDTO userDTO) {
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setDob(userDTO.getDob());
+        userRepository.save(user);
+    }
+
+    public void updateUser(String userId, UserDTO userDTO) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setDob(userDTO.getDob());
+        userRepository.save(user);
+    }
+
+    public void deleteUser(String userId) {
+        userRepository.deleteById(userId);
+    }
+
+    public UserDTO getUserById(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserDTO(user);
+    }
+
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream().map(UserDTO::new).collect(Collectors.toList());
+    }
+
+    public void createRole(RoleDTO roleDTO) {
+        Role role = new Role();
+        role.setName(roleDTO.getName());
+        roleRepository.save(role);
+    }
+
+    public void updateRole(Long roleId, RoleDTO roleDTO) {
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        role.setName(roleDTO.getName());
+        roleRepository.save(role);
+    }
+
+    public void deleteRole(Long roleId) {
+        roleRepository.deleteById(roleId);
+    }
+
+    public RoleDTO getRoleById(Long roleId) {
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        return new RoleDTO(role);
+    }
+
+    public List<RoleDTO> getAllRoles() {
+        return roleRepository.findAll().stream().map(RoleDTO::new).collect(Collectors.toList());
+    }
+
+    public void assignRoleToUser(String userId, Long roleId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
+
+    public void removeRoleFromUser(String userId, Long roleId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        user.getRoles().remove(role);
+        userRepository.save(user);
+    }
+
+    public void approveProduct(ProductDTO productDTO) {
+        Product product = productRepository.findById(productDTO.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setApproved(true);
+        productRepository.save(product);
+    }
+
+    public void rejectProduct(Long productId) {
+        productRepository.deleteById(productId);
     }
 }

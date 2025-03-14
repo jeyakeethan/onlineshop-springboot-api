@@ -21,7 +21,7 @@ public class Order {
     private double totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "email")
+    @JoinColumn(name = "userId", referencedColumnName = "email")
     private User user;
 
     @OneToMany(mappedBy = "order")
@@ -30,4 +30,5 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "shipping_address_id")
     private Address shippingAddress;
+
 }
