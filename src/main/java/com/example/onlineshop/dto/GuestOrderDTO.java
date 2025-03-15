@@ -28,7 +28,7 @@ public class GuestOrderDTO {
 
         // Convert OrderItem entities to OrderItemDTO
         this.orderItemDTOs = order.getOrderItems().stream()
-                .map(item -> new OrderItemDTO(orderId, item.getSku(), item.getQuantity(), item.getPriceAtPurchase()))
+                .map(OrderItemDTO::new)
                 .collect(Collectors.toList());
     }
 }

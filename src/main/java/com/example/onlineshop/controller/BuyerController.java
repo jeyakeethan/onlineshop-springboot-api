@@ -42,8 +42,8 @@ public class BuyerController {
 
     @Operation(summary = "Filter products", description = "Filter products by category and subcategory")
     @GetMapping("/products/filter")
-    public List<ProductDTO> filterProducts(@RequestParam String category, @RequestParam String subcategory) {
-        return buyerService.filterProducts(category, subcategory);
+    public List<ProductDTO> filterProducts(@RequestParam String category, @RequestParam String keyword) {
+        return buyerService.filterProducts(category, keyword);
     }
 
     // Cart Operations
@@ -82,7 +82,7 @@ public class BuyerController {
     public ResponseEntity<OrderDTO> checkout(@RequestParam String userId) {
         try {
             // Delegate the checkout process to the service layer
-            OrderDTO order = buyerService.checkout(userId);
+            OrderDTO order = buyerService.checkout();
             return ResponseEntity.ok(order);
         } catch (Exception e) {
             // Handle errors such as empty cart, payment failure, etc.
@@ -111,13 +111,13 @@ public class BuyerController {
     // Profile Management
     @Operation(summary = "Get user profile", description = "Retrieve the profile details of a user")
     @GetMapping("/profile")
-    public UserDTO getUserProfile(@RequestParam String userId) {
-        return buyerService.getUserProfile(userId);
+    public UserDTO getUserProfile() {
+        return buyerService.getUserProfile();
     }
 
     @Operation(summary = "Update user profile", description = "Update the profile details of a user")
     @PutMapping("/profile/update")
-    public void updateUserProfile(@RequestParam String userId, @RequestBody UserDTO userDTO) {
-        buyerService.updateUserProfile(userId, userDTO);
+    public void updateUserProfile(@RequestBody UserDTO userDTO) {
+        buyerService.updateUserProfile(userDTO);
     }
 }

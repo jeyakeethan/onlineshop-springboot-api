@@ -25,6 +25,8 @@ public class OrderItem {
     private int quantity;
     private double priceAtPurchase;  // Storing price at the time of purchase
 
+    private boolean isReturned;
+
     public OrderItem(SKU sku, int quantity, double priceAtPurchase) {
         this.sku = sku;
         this.quantity = quantity;

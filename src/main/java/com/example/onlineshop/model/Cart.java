@@ -16,7 +16,7 @@ public class Cart {
     private Long cartId;
 
     @ManyToOne
-    @JoinColumn(name = "user_email", referencedColumnName = "email")
+    @JoinColumn(name = "userId", referencedColumnName = "email")
     private User user;
 
     @OneToMany(mappedBy = "cart")

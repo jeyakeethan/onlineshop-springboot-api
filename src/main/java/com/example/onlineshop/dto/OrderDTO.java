@@ -28,7 +28,7 @@ public class OrderDTO {
 
         // Convert OrderItem entities to OrderItemDTO
         this.orderItems = order.getOrderItems().stream()
-                .map(item -> new OrderItemDTO(order.getOrderId(), item.getSku(), item.getQuantity(), item.getPriceAtPurchase()))
+                .map(OrderItemDTO::new)
                 .collect(Collectors.toList());
     }
 }

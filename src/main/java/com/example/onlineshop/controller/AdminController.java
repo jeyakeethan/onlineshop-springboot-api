@@ -11,9 +11,10 @@ import com.example.onlineshop.service.ProductService;
 import com.example.onlineshop.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,9 +74,9 @@ public class AdminController {
     @Operation(summary = "Create a new user", description = "Create a new user in the system.")
     @ApiResponse(responseCode = "200", description = "User created successfully.")
     @PostMapping("/user/create")
-    public String createUser(@RequestBody UserDTO userDTO) {
-        userService.addUser(userDTO);
-        return "User created successfully.";
+    public ResponseEntity<String> createUser(@RequestBody UserDTO userDTO) {
+        String jwtToken = userService.registerUser(userDTO);
+        return ResponseEntity.ok(jwtToken);
     }
 
     @Operation(summary = "Update a user", description = "Update the details of an existing user.")
@@ -95,7 +96,7 @@ public class AdminController {
     public String deleteUser(
             @Parameter(description = "ID of the user to be deleted", required = true)
             @PathVariable String userId) {
-        userService.deleteUserByEmail(userId);
+        userService.deleteUser(userId);
         return "User deleted successfully.";
     }
 
@@ -190,7 +191,7 @@ public class AdminController {
     @ApiResponse(responseCode = "200", description = "Product approved successfully.")
     @PutMapping("/product/approve")
     public String approveProduct(@RequestBody ProductDTO productDTO) {
-        productService.approveProduct(productDTO);
+        adminService.approveProduct(productDTO);
         return "Product approved successfully.";
     }
 
@@ -200,7 +201,7 @@ public class AdminController {
     public String rejectProduct(
             @Parameter(description = "ID of the product to be rejected", required = true)
             @PathVariable Long productId) {
-        productService.rejectProduct(productId);
+        adminService.rejectProduct(productId);
         return "Product rejected successfully.";
     }
 

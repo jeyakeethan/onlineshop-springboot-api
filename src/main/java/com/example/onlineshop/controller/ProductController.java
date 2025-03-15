@@ -102,16 +102,4 @@ public class ProductController {
         return buyerService.getProductsBySubcategory(subcategory); // Retrieve products by subcategory
     }
 
-    // Admin can update product inventory
-    @Operation(summary = "Manage Inventory", description = "Update the inventory quantity for a product (Admin only).")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product inventory updated successfully."),
-            @ApiResponse(responseCode = "400", description = "Invalid inventory data."),
-            @ApiResponse(responseCode = "404", description = "Product not found."),
-            @ApiResponse(responseCode = "403", description = "Forbidden: Admin access required.")
-    })
-    @PutMapping("/admin/{productId}/inventory")
-    public void updateProductInventory(@PathVariable Long productId, @RequestParam Integer quantity) {
-        adminService.updateProductInventory(productId, quantity); // Update product inventory
-    }
 }

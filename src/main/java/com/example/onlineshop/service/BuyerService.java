@@ -4,7 +4,9 @@ import com.example.onlineshop.dto.*;
 import com.example.onlineshop.model.*;
 import com.example.onlineshop.repository.*;
 import com.example.onlineshop.util.AuthenticationHelper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,9 @@ public class BuyerService {
     @Autowired
     private AuthenticationHelper authenticationHelper;
 
+    @Autowired
+    private UserService userService;
+
     // Product Browsing with Category and Subcategory Hierarchy
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream().map(ProductDTO::new).collect(Collectors.toList());
@@ -77,7 +82,7 @@ public class BuyerService {
                 .collect(Collectors.toList());
 
         // Find all products associated with the found subcategories
-        return productRepository.findByCategoryIn(subcategoryNames).stream()
+        return productRepository.findBySubcategoryIn(subcategoryNames).stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }
@@ -107,7 +112,8 @@ public class BuyerService {
         return new CartDTO(cart);
     }
 
-    public void addProductToCart(Long inventoryId, String userId, Integer quantity) {
+    public void addProductToCart(Long inventoryId, Integer quantity) {
+        String userId = authenticationHelper.getCurrentUserId();;
         Cart cart = cartRepository.findByUserEmail(userId);
         if (cart == null) {
             throw new RuntimeException("Cart not found for the user");
@@ -132,7 +138,8 @@ public class BuyerService {
         cartRepository.save(cart);
     }
 
-    public void updateCartProductQuantity(Long inventoryId, String userId, Integer quantity) {
+    public void updateCartProductQuantity(Long inventoryId, Integer quantity) {
+        String userId = authenticationHelper.getCurrentUserId();
         Cart cart = cartRepository.findByUserEmail(userId);
         cart.getCartItems().forEach(item -> {
             if (item.getInventory().getInventoryId().equals(inventoryId)) {
@@ -150,34 +157,35 @@ public class BuyerService {
 
     // Checkout process
     public OrderDTO checkout() {
+        String userId = authenticationHelper.getCurrentUserId();
         // Step 1: Retrieve the user's cart
-        CartDTO cart = cartRepository.getCart(authenticationHelper.getCurrentUserId());
-        if (cart == null || cart.getItems().isEmpty()) {
+        CartDTO cart = cartRepository.getCartByUserId(userId);
+        if (cart == null || cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cart is empty. Please add items to the cart before checking out.");
         }
 
         // Step 2: Place the order based on the cart contents
         List<Long> inventoryIds = new ArrayList<>();
         List<Integer> quantities = new ArrayList<>();
-        for (CartItemDTO item : cart.getItems()) {
+        for (CartItemDTO item : cart.getCartItems()) {
             inventoryIds.add(item.getInventoryId());
             quantities.add(item.getQuantity());
         }
 
-        placeOrder(inventoryIds, quantities);
+        Order order = placeOrder(inventoryIds, quantities);
 
         // Step 3: Clear the user's cart after placing the order
-        cartRepository.clearCart(authenticationHelper.getCurrentUserId());
+        cartRepository.deleteById(cart.getCartId());
 
         // Step 4: Return the order details as a DTO (could include more details as per your design)
-        OrderDTO orderDTO = new OrderDTO();
+        OrderDTO orderDTO = new OrderDTO(order);
         // Populate orderDTO with order details (e.g., order ID, status, etc.)
         // For now, return a basic message (you can enhance this further)
         return orderDTO;
     }
 
     // Place order logic
-    public void placeOrder(List<Long> inventoryIds, List<Integer> quantities) {
+    public Order placeOrder(List<Long> inventoryIds, List<Integer> quantities) {
         // Create and save order logic based on inventoryId
         if (inventoryIds.size() != quantities.size()) {
             throw new IllegalArgumentException("Inventory IDs and quantities size must match");
@@ -191,7 +199,7 @@ public class BuyerService {
 
         // Retrieve user details
         String userId = authenticationHelper.getCurrentUserId();
-        User user = userRepository.findByEmail(userId).orElseThrow(() ->
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new UsernameNotFoundException("User not found with email: " + userId)
         );
 
@@ -231,6 +239,7 @@ public class BuyerService {
 
         // Save the order to the database
         orderRepository.save(order);
+        return order;
     }
 
     public OrderDTO getOrderDetails(Long orderId) {
@@ -252,13 +261,13 @@ public class BuyerService {
         orderRepository.save(order);
     }
 
-    public void returnProduct(Long inventoryId, Long orderId) {
+    public void returnProduct(Long skuId, Long orderId) {
         // Implement return logic based on inventoryId
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        Optional<CartItem> item = order.getOrderItems().stream()
-                .filter(cartItem -> cartItem.getInventory().getInventoryId().equals(inventoryId))
+        Optional<OrderItem> item = order.getOrderItems().stream()
+                .filter(cartItem -> cartItem.getSku().getSkuId().equals(skuId))
                 .findFirst();
 
         if (item.isPresent()) {
@@ -302,5 +311,44 @@ public class BuyerService {
         Review review = new Review(userId, product, reviewText, rating);
         product.getReviews().add(review);
         productRepository.save(product);
+    }
+
+    public List<ProductDTO> filterProducts(String category, String keyword) {
+        List<Product> filteredProducts = productRepository.findByCategoryAndNameContaining(category, keyword);
+        return filteredProducts.stream()
+                .map(ProductDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<OrderDTO> getOrdersByUser(String userId) {
+        return orderRepository.findByUserId(userId).stream().map(OrderDTO::new).toList();
+    }
+
+    public OrderDTO getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));  // Fetch specific order by ID
+        return new OrderDTO(order);
+    }
+
+    @Transactional
+    @Modifying
+    public void updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));  // Fetch order by ID
+        order.setOrderStatus(status);  // Set the new status to the order
+        orderRepository.save(order);  // Save the updated order
+    }
+
+    public UserDTO getUserProfile() {
+        return userService.getAuthenticatedUser();
+    }
+
+    public void updateUserProfile(UserDTO userDTO) {
+        String userId = authenticationHelper.getCurrentUserId();
+        if (userDTO.getEmail().equals(userId)) {
+            userService.updateUser(userId, userDTO);
+        } else {
+            throw new RuntimeException("Unauthorised attempt to update a user profile");
+        }
     }
 }

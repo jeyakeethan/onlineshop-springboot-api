@@ -14,25 +14,37 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
-    // Method to save an image to the database
+    // Save an image to the database
     public Image saveImage(MultipartFile file, String imageName, String imageType) throws IOException {
         Image image = new Image();
         image.setImageData(file.getBytes());  // Convert the file to byte array
         image.setImageName(imageName);        // Set the image name
         image.setImageType(imageType);        // Set the image type (MIME type)
 
-        // Save the image object in the database
         return imageRepository.save(image);
     }
 
-    // Method to get an image by its ID
+    // Get an image by its ID
     public Image getImage(Long imageId) {
         return imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
     }
 
-    // Method to delete an image by its ID
+    // Delete an image by its ID
     public void deleteImage(Long imageId) {
+        if (!imageRepository.existsById(imageId)) {
+            throw new RuntimeException("Image not found with id: " + imageId);
+        }
         imageRepository.deleteById(imageId);
+    }
+
+    // Update an existing image
+    public Image updateImage(Long imageId, MultipartFile newFile) throws IOException {
+        Image existingImage = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
+
+        existingImage.setImageData(newFile.getBytes());  // Update image data
+
+        return imageRepository.save(existingImage);
     }
 }

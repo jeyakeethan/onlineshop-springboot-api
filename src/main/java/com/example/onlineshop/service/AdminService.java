@@ -30,6 +30,9 @@ public class AdminService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private ProductService productService;
+
     // Add a new product along with SKUs
     public void addProduct(ProductDTO productDTO) {
         Product product = new Product();
@@ -66,9 +69,8 @@ public class AdminService {
         inventoryRepository.save(inventory);
     }
 
-    public void updateProductPricing(Long skuId, double newSellingPrice, double newCostPrice) {
-        SKU sku = skuRepository.findById(skuId).orElseThrow(() -> new RuntimeException("SKU not found"));
-        Inventory inventory = inventoryRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Inventory not found"));
+    public void updateProductPricing(Long inventoryId, double newSellingPrice, double newCostPrice) {
+        Inventory inventory = inventoryRepository.findById(inventoryId).orElseThrow(() -> new RuntimeException("Inventory not found"));
         inventory.setSellingPrice(newSellingPrice);
         inventory.setCostPrice(newCostPrice);
         inventoryRepository.save(inventory);
@@ -155,5 +157,13 @@ public class AdminService {
 
     public void rejectProduct(Long productId) {
         productRepository.deleteById(productId);
+    }
+
+    public void deleteProduct(Long productId) {
+        productService.deleteProduct(productId);
+    }
+
+    public void updateProduct(Long productId, ProductDTO productDTO) {
+        productService.updateProduct(productId, productDTO);
     }
 }

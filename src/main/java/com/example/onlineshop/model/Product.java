@@ -19,6 +19,8 @@ public class Product {
 
     private String name;
     private String description;
+    private Image image;
+    private boolean approved;
 
     @ManyToOne
     @JoinColumn(name = "category", referencedColumnName = "subcategory", nullable = false)// Foreign key for category
