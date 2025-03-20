@@ -8,5 +8,4 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Cart findByUserEmail(String email);
 
-    CartDTO getCartByUserId(String userId);
 }

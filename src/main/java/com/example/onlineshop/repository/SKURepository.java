@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface SKURepository extends JpaRepository<SKU, Long> {
 
-    void deleteByProductId(Long productId);
+    void deleteByProduct_ProductId(Long productId);
 
     List<SKU> findByProduct(Product product);
 }

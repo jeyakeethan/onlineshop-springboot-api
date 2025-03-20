@@ -3,6 +3,7 @@ package com.example.onlineshop.model;
 import jakarta.persistence.*;
         import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,11 +30,12 @@ public class User implements UserDetails {
     private String dob;
     private LocalDate lastLoginTime;
 
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_email", referencedColumnName = "email"), // Foreign key to User
-            inverseJoinColumns = @JoinColumn(name = "role_id") // Foreign key to Role
+            joinColumns = @JoinColumn(name = "user_email", referencedColumnName = "email"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private List<Role> roles = new ArrayList<>();
 

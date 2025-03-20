@@ -1,6 +1,7 @@
 package com.example.onlineshop.config;
 
 import com.example.onlineshop.security.JwtAuthenticationFilter;
+import com.example.onlineshop.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,10 +30,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/buyer/**").hasRole("BUYER")
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/authenticate").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/buyer/**").hasRole("BUYER")
+                                .requestMatchers("/api/admin/user/{userId}").hasAnyRole("ADMIN", "BUYER")
+                                .requestMatchers("/index.html").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

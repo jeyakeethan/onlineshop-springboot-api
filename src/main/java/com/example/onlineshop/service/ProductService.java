@@ -32,7 +32,6 @@ public class ProductService {
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
-        product.setImage(productDTO.getImage());
         productRepository.save(product);
 
         // Add SKUs for the product
@@ -51,11 +50,10 @@ public class ProductService {
 
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
-        product.setImage(productDTO.getImage());
         productRepository.save(product);
 
         // Update SKUs for the product (assuming new SKU codes are provided)
-        skuRepository.deleteByProductId(productId); // Delete existing SKUs associated with the product
+        skuRepository.deleteByProduct_ProductId(productId); // Delete existing SKUs associated with the product
 
         // Process SKU list from productDTO
         List<SKU> existingSkus = skuRepository.findByProduct(product); // Fetch all existing SKUs for the product from the DB
@@ -79,21 +77,21 @@ public class ProductService {
 
     // Get all products
     public List<ProductDTO> getAllProductsComplete() {
-        return productRepository.findAllProductsComplete().stream()
+        return productRepository.findAll().stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }
 
     // Get product by ID
     public ProductDTO getProductByIdComplete(Long productId) {
-        Product product = productRepository.findByIdComplete(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         return new ProductDTO(product);
     }
 
     // Get products by category
     public List<ProductDTO> getProductsByCategory(String category) {
-        return productRepository.findByCategory(category).stream()
+        return productRepository.findByCategory_Subcategory(category).stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }

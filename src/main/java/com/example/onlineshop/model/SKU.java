@@ -27,4 +27,7 @@ public class SKU {
 
     @OneToMany(mappedBy = "sku", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sku", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;  // A SKU can have multiple images
 }

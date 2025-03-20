@@ -15,7 +15,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "userId", referencedColumnName = "email")
     private User user;
 

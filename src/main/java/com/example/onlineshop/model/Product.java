@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Calendar;
 import java.util.List;
 
 @Entity
@@ -19,7 +18,6 @@ public class Product {
 
     private String name;
     private String description;
-    private Image image;
     private boolean approved;
 
     @ManyToOne
@@ -34,5 +32,4 @@ public class Product {
 
     private boolean isAvailable;
 
-    // Other fields for product
 }

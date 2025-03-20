@@ -24,9 +24,8 @@ public class Image {
     @Column(name = "image_type", nullable = false)
     private String imageType;  // The type of the image (e.g., image/jpeg, image/png)
 
-    @ManyToOne  // If this image is associated with a product, for example
-    @JoinColumn(name = "product_id")
-    private Product product;  // The product this image belongs to, if relevant
+    @ManyToOne  // If this image is associated with a SKU, for example
+    @JoinColumn(name = "sku_id")
+    private SKU sku;  // The SKU this image belongs to, if relevant
 
-    // Other fields (such as size, dimensions) can be added here, if necessary
 }

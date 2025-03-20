@@ -17,7 +17,6 @@ public class ProductDTO {
     private CategoryDTO categoryDTO;  // CategoryDTO for mapping the subcategory
     private List<SKUDTO> skuDTOs;    // List of SKUs for the product
     private boolean isAvailable;
-    private Image image;
     private boolean approved;
 
     public ProductDTO(Product product) {

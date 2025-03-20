@@ -116,7 +116,7 @@ public class ReportService {
         return users.stream()
                 .map(user -> {
                     UserDTO userDTO = new UserDTO();
-                    userDTO.setUserId(user.getUserId());
+                    userDTO.setEmail(user.getUserId());
                     userDTO.setFirstName(user.getFirstName());
                     userDTO.setEmail(user.getEmail());
                     userDTO.setLastLoginTime(user.getLastLoginTime());

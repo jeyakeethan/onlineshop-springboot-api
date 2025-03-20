@@ -1,9 +1,6 @@
 package com.example.onlineshop.controller;
 
-import com.example.onlineshop.dto.ProductDTO;
-import com.example.onlineshop.dto.OrderDTO;
-import com.example.onlineshop.dto.UserDTO;
-import com.example.onlineshop.dto.RoleDTO;
+import com.example.onlineshop.dto.*;
 import com.example.onlineshop.service.AdminService;
 import com.example.onlineshop.service.UserService;
 import com.example.onlineshop.service.RoleService;

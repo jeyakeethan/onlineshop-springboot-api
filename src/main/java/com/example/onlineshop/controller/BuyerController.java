@@ -1,7 +1,9 @@
 package com.example.onlineshop.controller;
 
 import com.example.onlineshop.dto.*;
+import com.example.onlineshop.model.User;
 import com.example.onlineshop.service.BuyerService;
+import com.example.onlineshop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

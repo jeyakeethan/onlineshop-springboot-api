@@ -82,29 +82,29 @@ public class BuyerService {
                 .collect(Collectors.toList());
 
         // Find all products associated with the found subcategories
-        return productRepository.findBySubcategoryIn(subcategoryNames).stream()
+        return productRepository.findByCategoryIn(subcategoryNames).stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }
 
 
     public List<ProductDTO> getProductsBySubcategory(String subcategory) {
-        return productRepository.findBySubcategory(subcategory).stream()
+        return productRepository.findByCategory_Subcategory(subcategory).stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }
 
-    public List<ProductDTO> getProductsByPriceRange(Double minPrice, Double maxPrice) {
-        return productRepository.findByPriceBetween(minPrice, maxPrice).stream()
-                .map(ProductDTO::new)
-                .collect(Collectors.toList());
-    }
+//    public List<ProductDTO> getProductsByPriceRange(Double minPrice, Double maxPrice) {
+//        return productRepository.findBySellingPriceBetween(minPrice, maxPrice).stream()
+//                .map(ProductDTO::new)
+//                .collect(Collectors.toList());
+//    }
 
-    public List<ProductDTO> getProductsOnSale() {
-        return productRepository.findByOnSaleTrue().stream()
-                .map(ProductDTO::new)
-                .collect(Collectors.toList());
-    }
+//    public List<ProductDTO> getProductsOnSale() {
+//        return productRepository.findByOnSaleTrue().stream()
+//                .map(ProductDTO::new)
+//                .collect(Collectors.toList());
+//    }
 
     // Cart Operations (Updated to handle Inventory and SKU correctly)
     public CartDTO getCart(String userId) {
@@ -159,7 +159,7 @@ public class BuyerService {
     public OrderDTO checkout() {
         String userId = authenticationHelper.getCurrentUserId();
         // Step 1: Retrieve the user's cart
-        CartDTO cart = cartRepository.getCartByUserId(userId);
+        Cart cart = cartRepository.findByUserEmail(userId);
         if (cart == null || cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cart is empty. Please add items to the cart before checking out.");
         }
@@ -167,8 +167,8 @@ public class BuyerService {
         // Step 2: Place the order based on the cart contents
         List<Long> inventoryIds = new ArrayList<>();
         List<Integer> quantities = new ArrayList<>();
-        for (CartItemDTO item : cart.getCartItems()) {
-            inventoryIds.add(item.getInventoryId());
+        for (CartItem item : cart.getCartItems()) {
+            inventoryIds.add(item.getInventory().getInventoryId());
             quantities.add(item.getQuantity());
         }
 
@@ -232,7 +232,7 @@ public class BuyerService {
         // Set order items to the order
         order.setOrderItems(orderItems);
 
-        List<Address> addresses = addressRepository.findByUserId(userId);
+        List<Address> addresses = addressRepository.findByUser_Email(userId);
         // Set shipping address (you can extend the logic to handle the user's shipping address)
         // For simplicity, let's assume the shipping address is set via the user object
         order.setShippingAddress(addresses.get(0));
@@ -249,7 +249,7 @@ public class BuyerService {
     }
 
     public List<OrderDTO> getUserOrders(String userId) {
-        return orderRepository.findByUserId(userId).stream()
+        return orderRepository.findByUser_email(userId).stream()
                 .map(OrderDTO::new)
                 .collect(Collectors.toList());
     }
@@ -314,14 +314,14 @@ public class BuyerService {
     }
 
     public List<ProductDTO> filterProducts(String category, String keyword) {
-        List<Product> filteredProducts = productRepository.findByCategoryAndNameContaining(category, keyword);
+        List<Product> filteredProducts = productRepository.findByCategory_SubcategoryAndNameContaining(category, keyword);
         return filteredProducts.stream()
                 .map(ProductDTO::new)
                 .collect(Collectors.toList());
     }
 
     public List<OrderDTO> getOrdersByUser(String userId) {
-        return orderRepository.findByUserId(userId).stream().map(OrderDTO::new).toList();
+        return orderRepository.findByUser_email(userId).stream().map(OrderDTO::new).toList();
     }
 
     public OrderDTO getOrderById(Long orderId) {

@@ -28,9 +28,8 @@ public class UserDTO {
         this.email = user.getEmail();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
-        this.password = user.getPassword();
         this.dob = user.getDob();
-        this.lastLoginTime = LocalDate.now(); // Assuming lastLoginTime is not stored in User entity
+        this.lastLoginTime = LocalDate.now();
 
         // Convert List<Role> to List<String> (role names only)
         this.roles = user.getRoles().stream()
@@ -42,9 +41,5 @@ public class UserDTO {
     // Getter & Setter for userId (mapped to email)
     public String getUserId() {
         return this.email;
-    }
-
-    public void setUserId(String userId) {
-        this.email = userId;
     }
 }

@@ -11,11 +11,29 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
+import java.util.Properties;
+import java.io.InputStream;
+import java.io.IOException;
 
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "YOUR_SECRET_KEY_HERE"; // Replace with a secure key
+    private static final String SECRET_KEY = getSecretKeyFromProps();
+
+    private static String getSecretKeyFromProps() {
+        Properties properties = new Properties();
+        try (InputStream input = JwtUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                System.out.println("Sorry, unable to find app.props");
+                return null;
+            }
+            properties.load(input);
+            return properties.getProperty("secret.key");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()

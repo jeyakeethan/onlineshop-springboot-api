@@ -8,6 +8,9 @@ import com.example.onlineshop.repository.UserRepository;
 import com.example.onlineshop.security.JwtUtil;
 import com.example.onlineshop.util.AuthenticationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -66,6 +69,9 @@ public class UserService {
             throw new RuntimeException("Invalid credentials");
         }
 
+        user.setLastLoginTime(LocalDate.now());
+        userRepository.save(user);
+
         return jwtUtil.generateToken(user);
     }
 
@@ -110,5 +116,12 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(UserDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user;
     }
 }

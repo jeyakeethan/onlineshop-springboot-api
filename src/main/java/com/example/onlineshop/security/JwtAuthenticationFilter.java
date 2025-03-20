@@ -1,6 +1,7 @@
 package com.example.onlineshop.security;
 
 import com.example.onlineshop.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +18,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserService userService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, @Lazy UserService userService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
     }

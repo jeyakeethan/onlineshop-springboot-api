@@ -12,22 +12,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByNameContaining(String keyword);
 
-    Optional<Product> findByOnSaleTrue();
+//    Optional<Product> findByOnSaleTrue();
 
-    Optional<Product> findByPriceBetween(Double minPrice, Double maxPrice);
+    List<Product> findByCategory_Subcategory(String subcategory);
 
-    List<Product> findByCategory(String subcategory);
-
-    List<Product> findByCategoryAndNameContaining(String category, String keyword);
+    List<Product> findByCategory_SubcategoryAndNameContaining(String subcategory, String name);
 
     // Use @EntityGraph to eagerly load skus and inventories when fetching a product
     @EntityGraph(attributePaths = {"skus", "skus.inventories"})
-    Optional<Product> findByIdComplete(Long productId);
+    Optional<Product> findById(Long productId);
 
     @EntityGraph(attributePaths = {"skus", "skus.inventories"})
-    List<Product> findAllProductsComplete();
+    List<Product> findAll();
 
-    List<Product> findBySubcategory(String subcategory);
+    List<Product> findByCategoryIn(List<String> subcategoryNames);
 
-    List<Product> findBySubcategoryIn(List<String> subcategoryNames);
 }

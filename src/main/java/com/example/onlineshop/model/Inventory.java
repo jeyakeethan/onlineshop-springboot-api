@@ -21,4 +21,8 @@ public class Inventory {
     private double costPrice;  // Cost price of this SKU variant
     private double sellingPrice;  // Selling price of this SKU variant
     private int stockAvailable;  // Available stock for this SKU variant
+
+    @ManyToOne
+    @JoinColumn(name = "wishlist_id")  // Foreign key to wishlist table
+    private WishList wishlist;
 }
